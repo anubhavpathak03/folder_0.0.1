@@ -1,0 +1,6 @@
+**\build
+**\dist
+**\__pycache__
+*PCMonitor_client.spec
+*PCMonitor_Master.spec
+**\myvenv
