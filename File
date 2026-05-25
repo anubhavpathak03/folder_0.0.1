@@ -1,0 +1,226 @@
+Here is a clear, step-by-step flowchart breaking down the PCMonitor setup and build process based on your README.
+
+---
+
+## PCMonitor Build Workflow
+
+```
+[ Start: PCMonitor Repository ]
+               │
+               ▼
+┌──────────────────────────────┐
+│  Verify Prerequisites        │
+│  - Python 3.10+ (3.11 Rec.)  │
+│  - Windows OS                │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│  1. Environment Setup        │
+│  - Open PowerShell           │
+│  - Activate virtualenv       │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│  2. Install Dependencies     │
+│  - Upgrade pip               │
+│  - pip install -r req.txt    │
+│  - pip install pyinstaller   │
+└──────────────┬───────────────┘
+               │
+               ▼
+       /===============\
+      /  Which build    \
+     <   method to use?  >
+      \                 /
+       \===============/
+         /           \
+   [Existing Specs]   [New Script]
+       /               \
+      ▼                 ▼
+┌──────────────────┐   ┌────────────────────────────────┐
+│ 3A. Use Existing │   │ 3B. Generate New Build         │
+│     .spec Files  │   │  Choose flags based on script: │
+└────────┬─────────┘   │  - --onefile (Single EXE)      │
+         │             │  - --windowed (No Console)     │
+         │             │  - --add-data (Include Assets) │
+         │             └──────────────┬─────────────────┘
+         │                            │
+         ▼                            ▼
+┌───────────────────────────────────────────────────────┐
+│              4. Run PyInstaller Command               │
+└──────────────────────────┬────────────────────────────┘
+                           │
+                           ▼
+┌───────────────────────────────────────────────────────┐
+│               5. Review Output Folders                │
+│  - build/ : Intermediate build artifacts & logs        │
+│  - dist/  : Standalone Windows Executable(s) (EXEs)   │
+└──────────────────────────┬────────────────────────────┘
+                           │
+                           ▼
+                   /===============\
+                  /  Does the EXE   \
+                 <   work properly?  >
+                  \                 /
+                   \===============/
+                     /           \
+                  [No]           [Yes]
+                   /               \
+                  ▼                 ▼
+     ┌────────────────────────┐   ┌────────────────────────┐
+     │ 6A. Troubleshooting     │   │ 6B. (Optional) Advanced│
+     │ - Missing modules?     │   │     Packaging          │
+     │   Use --hidden-import  │   │   - Create Windows     │
+     │ - Large size?          │   │     installer using    │
+     │   Check imports        │   │     Inno Setup         │
+     │ - Antivirus flags?     │   └───────────┬────────────┘
+     │   Code-sign binary     │               │
+     └────────────┬───────────┘               │
+                  │                           │
+                  └────────────► [ End ] ◄────┘
+
+```
+
+---
+
+### Phase Breakdown
+
+* **Phase 1 & 2: Setup:** Prepares your local Windows environment. Activating the `venv` ensures external libraries like `websockets`, `psutil`, and `pystray` don't conflict with your global Python installation.
+* **Phase 3 & 4: Compilation:** You choose between using the pre-configured `.spec` configuration files already in the repository or configuring a brand-new build from scratch using command-line arguments.
+* **Phase 5 & 6: Output & Refinement:** PyInstaller separates its compilation workspace (`build/`) from your finished, shippable asset (`dist/`). If anything fails at runtime, you loop back to troubleshooting or advance to building a formal installer wizard.
+
+
+
+
+
+
+
+
+Here is the detailed, step-by-step procedure to set up, build, and troubleshoot the **PCMonitor** project on a Windows machine.
+
+---
+
+## Phase 1: Environment & Dependency Setup
+
+This initial phase isolates your project environment and installs all required external libraries.
+
+* **Step 1: Open PowerShell**
+Launch PowerShell on your Windows machine.
+* **Step 2: Activate the Virtual Environment (`venv`)**
+Run the following command to set the execution policy for your session and activate your virtual environment:
+```powershell
+(Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned) ; (& .\myvenv\Scripts\Activate.ps1)
+
+```
+
+
+* **Step 3: Upgrade Package Installer (`pip`)**
+Ensure you have the latest version of pip installed:
+```powershell
+python -m pip install --upgrade pip
+
+```
+
+
+* **Step 4: Install Required Libraries**
+Install all project dependencies listed in the requirements file:
+```powershell
+pip install -r requirement.txt
+
+```
+
+
+*This will install external packages like `websockets` (real-time communication), `psutil` (system metrics), `pystray` (system tray UI), `Pillow` (image/icon processing), and `python-dotenv` (configuration management).*
+* **Step 5: Install PyInstaller**
+Install the packaging tool used to generate the final executable:
+```powershell
+pip install pyinstaller
+
+```
+
+
+
+---
+
+## Phase 2: Building the Windows Executable (`.exe`)
+
+You can build the executable using two different methods depending on your needs.
+
+### Method A: Using Pre-configured `.spec` Files (Recommended)
+
+If you want to use the build configurations already optimized for the repository:
+
+* **Step 6A: Build the Master application**
+```powershell
+pyinstaller PCMonitor_Master.spec
+
+```
+
+
+* **Step 7A: Build the Client application**
+```powershell
+pyinstaller PCMonitor_Client.spec
+
+```
+
+
+
+### Method B: Generating a New Build from Scripts
+
+If you want to create a brand new configuration directly from the Python scripts, use the following flags:
+
+* **Step 6B (Console App):** To build a single-file console application for the Master script:
+```powershell
+pyinstaller --onefile master.py
+
+```
+
+
+* **Step 7B (Windowed App):** To build a single-file client application that runs silently in the background with no console window:
+```powershell
+pyinstaller --onefile --windowed client.py
+
+```
+
+
+* **Step 8B (Adding Assets):** If your script requires external folders or data files, bundle them by separating the source and destination paths with a semicolon:
+```powershell
+pyinstaller --onefile --add-data "path\to\data;data" master.py
+
+```
+
+
+
+---
+
+## Phase 3: Locating & Verifying Output
+
+Once PyInstaller finishes running, it generates specific directories in your project folder.
+
+* **Step 9: Locate Intermediate Files (`build/`)**
+Check the `build/` folder for logs and temporary files used during compilation. This is helpful for debugging if the build fails.
+* **Step 10: Retrieve Your Executables (`dist/`)**
+Go to the `dist/` directory. Your final, standalone Windows executable(s) will be stored here (either inside a dedicated subfolder or as a single `.exe` file).
+
+---
+
+## Phase 4: Troubleshooting & Maintenance
+
+If your application throws errors after compilation or you need to update it later, follow these steps:
+
+* **Handling Missing Modules:** If the application crashes at runtime complaining about a missing package, rebuild it by explicitly declaring the module:
+```powershell
+pyinstaller --hidden-import package_name master.py
+
+```
+
+
+* **Managing File Size:** If the `.exe` file is too large, ensure you are using the `--onefile` flag and check your `.spec` file to exclude any unused global packages.
+* **Preventing Antivirus Flags:** If Windows Defender blocks your application, look into code-signing the binary, or bundle it into an official installer wizard.
+* **Updating Requirements:** If you add new code libraries during development, regenerate your tracking file before pushing changes:
+```powershell
+pip freeze > requirement.txt
+
+```
